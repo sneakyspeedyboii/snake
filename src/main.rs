@@ -33,7 +33,7 @@ pub fn main() -> Result<(), String> {
     let mut tick = 0;
 
     //Player init
-    let mut body_positions: Vec<(u32, u32)> = vec![(5, 5), (4, 5)];
+    let mut body_positions: Vec<(u32, u32)> = vec![(MAP_X_BOUND / 2, MAP_Y_BOUND / 2)];
     let mut player_facing = PlayerFacing::East;
 
     //Cryptographically secure apple placement
@@ -42,7 +42,7 @@ pub fn main() -> Result<(), String> {
         rand.gen_range(1..=MAP_Y_BOUND),
     );
 
-    'run: loop {
+    'main: loop {
         //Clear canvas with specified colour
         canvas.set_draw_color(Color::RGB(40, 44, 52));
         canvas.clear();
@@ -50,7 +50,7 @@ pub fn main() -> Result<(), String> {
         //Kill program if close requested
         for event in event_pump.poll_iter() {
             if let Event::Quit { .. } = event {
-                break 'run;
+                break 'main;
             }
         }
 
@@ -70,11 +70,11 @@ pub fn main() -> Result<(), String> {
             }
 
             if key == Scancode::Escape {
-                break 'run;
+                break 'main;
             }
         }
 
-        //Allows for user input every 10ms, but only moves every 300ms. Makes the game responsive
+        //Allows for user input every 10ms, while snake speed can be controlled via the UPDATE_SPEED constant
         if tick % UPDATE_SPEED == 0 {
             //Clone head and add new position
             let mut new_head_pos = body_positions[0];
@@ -114,8 +114,30 @@ pub fn main() -> Result<(), String> {
             //Insert head into body positions array
             body_positions.insert(0, new_head_pos);
 
+
+            //Game end checks
+            for (segment_index, (segment_x, segment_y)) in body_positions.clone().iter().enumerate()
+            {
+                for (other_segment_index, (other_segment_x, other_segment_y)) in
+                    body_positions.clone().iter().enumerate()
+                {
+                    if segment_x == other_segment_x
+                        && segment_y == other_segment_y
+                        && segment_index != other_segment_index
+                    {
+                        panic!("Snake collided with itself. W game end strat");
+                    }
+                }
+            }
+
             //If head on apple, then do not pop last value, to increase snake size, then reposition apple
             if body_positions[0].0 == apple.0 && body_positions[0].1 == apple.1 {
+
+                //Check if user beat the game
+                if body_positions.len() as u32 == MAP_X_BOUND * MAP_Y_BOUND {
+                    panic!("HOORAY");
+                }
+
                 let mut new_pos;
 
                 //Check generated apple pos is not in the body of the snake
@@ -139,33 +161,19 @@ pub fn main() -> Result<(), String> {
                 body_positions.pop();
             }
 
-            for (segment_index, (segment_x, segment_y)) in body_positions.clone().iter().enumerate()
-            {
-                for (other_segment_index, (other_segment_x, other_segment_y)) in
-                    body_positions.clone().iter().enumerate()
-                {
-                    if segment_x == other_segment_x
-                        && segment_y == other_segment_y
-                        && segment_index != other_segment_index
-                    {
-                        panic!("Snake collided with itself. W game end strat");
-                    }
-                }
-            }
-
             //Render
             let x_box_size = WIN_X / MAP_X_BOUND;
             let y_box_size = WIN_Y / MAP_Y_BOUND;
 
             for x in 1..=MAP_X_BOUND {
                 for y in 1..=MAP_Y_BOUND {
-                    canvas.set_draw_color(Color::RGB(255, 255, 255));
-                    canvas.draw_rect(Rect::new(
-                        ((x - 1) * x_box_size) as i32,
-                        ((y - 1) * y_box_size) as i32,
-                        x_box_size,
-                        y_box_size,
-                    ))?;
+                    // canvas.set_draw_color(Color::RGB(255, 255, 255));
+                    // canvas.draw_rect(Rect::new(
+                    //     ((x - 1) * x_box_size) as i32,
+                    //     ((y - 1) * y_box_size) as i32,
+                    //     x_box_size,
+                    //     y_box_size,
+                    // ))?;
 
                     for (segment_x, segment_y) in body_positions.clone() {
                         if segment_x == x && segment_y == y {
