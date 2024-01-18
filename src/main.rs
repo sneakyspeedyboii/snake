@@ -15,6 +15,7 @@ const MAP_Y_BOUND: u32 = 10;
 
 const UPDATE_SPEED: u32 = 30;
 
+#[inline] //W performance gains because they were really needed
 pub fn main() -> Result<(), String> {
     //Render init
     let sdl_context = sdl2::init()?;
@@ -24,7 +25,6 @@ pub fn main() -> Result<(), String> {
     let window = video_subsystem
         .window("Snake", WIN_X, WIN_Y)
         .position_centered()
-        .resizable()
         .build()
         .map_err(|e| e.to_string())?;
 
@@ -74,7 +74,7 @@ pub fn main() -> Result<(), String> {
             }
         }
 
-        //Allows for user input every 10ms, while snake speed can be controlled via the UPDATE_SPEED constant
+        //Allows for user input every UPDATE_SPEEDms, while snake speed can be controlled via the UPDATE_SPEED constant
         if tick % UPDATE_SPEED == 0 {
             //Clone head and add new position
             let mut new_head_pos = body_positions[0];
@@ -114,25 +114,8 @@ pub fn main() -> Result<(), String> {
             //Insert head into body positions array
             body_positions.insert(0, new_head_pos);
 
-
-            //Game end checks
-            for (segment_index, (segment_x, segment_y)) in body_positions.clone().iter().enumerate()
-            {
-                for (other_segment_index, (other_segment_x, other_segment_y)) in
-                    body_positions.clone().iter().enumerate()
-                {
-                    if segment_x == other_segment_x
-                        && segment_y == other_segment_y
-                        && segment_index != other_segment_index
-                    {
-                        panic!("Snake collided with itself. W game end strat");
-                    }
-                }
-            }
-
             //If head on apple, then do not pop last value, to increase snake size, then reposition apple
             if body_positions[0].0 == apple.0 && body_positions[0].1 == apple.1 {
-
                 //Check if user beat the game
                 if body_positions.len() as u32 == MAP_X_BOUND * MAP_Y_BOUND {
                     panic!("HOORAY");
@@ -161,20 +144,27 @@ pub fn main() -> Result<(), String> {
                 body_positions.pop();
             }
 
+            //Game end checks
+            for (segment_index, (segment_x, segment_y)) in body_positions.clone().iter().enumerate()
+            {
+                for (other_segment_index, (other_segment_x, other_segment_y)) in
+                    body_positions.clone().iter().enumerate()
+                {
+                    if segment_x == other_segment_x
+                        && segment_y == other_segment_y
+                        && segment_index != other_segment_index
+                    {
+                        panic!("Snake collided with itself. W game end strat");
+                    }
+                }
+            }
+
             //Render
             let x_box_size = WIN_X / MAP_X_BOUND;
             let y_box_size = WIN_Y / MAP_Y_BOUND;
 
             for x in 1..=MAP_X_BOUND {
                 for y in 1..=MAP_Y_BOUND {
-                    // canvas.set_draw_color(Color::RGB(255, 255, 255));
-                    // canvas.draw_rect(Rect::new(
-                    //     ((x - 1) * x_box_size) as i32,
-                    //     ((y - 1) * y_box_size) as i32,
-                    //     x_box_size,
-                    //     y_box_size,
-                    // ))?;
-
                     for (segment_x, segment_y) in body_positions.clone() {
                         if segment_x == x && segment_y == y {
                             let x_segment_size = x_box_size / 10 * 8;
@@ -221,3 +211,32 @@ enum PlayerFacing {
     South,
     West,
 }
+
+
+//havent read assign brief yet - probably requires improvements
+// implement this for improvements or smth idk
+
+// add sdl2 text lib for easy text rendering - grab silkscreen ttf/otf files
+
+// Start screen:
+//  Game title
+//  High score
+//  Previous score
+//  Start game
+//  Exit game
+
+
+// Main game:
+//  Basically done
+//  Add snake length to reach
+//  Add current snake length
+
+// Pause screen
+//  Snake length to reach
+//  Current snake length
+//  Main menu
+//  Exit game
+
+// Dead screen - temp screen 3s??
+//  Show score reached
+//  New high score???
