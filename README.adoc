@@ -1,5 +1,0 @@
-= Snake
-
-U14 A2 Assignment
-
-W snake game, banged out in an hour

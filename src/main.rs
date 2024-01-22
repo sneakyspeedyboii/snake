@@ -170,7 +170,7 @@ pub fn main() -> Result<(), String> {
                             let x_segment_size = x_box_size / 10 * 8;
                             let y_segment_size = y_box_size / 10 * 8;
 
-                            canvas.set_draw_color(Color::RGB(255, 0, 0));
+                            canvas.set_draw_color(Color::RGB(0, 255, 0));
                             canvas.fill_rect(Rect::new(
                                 ((x - 1) * x_box_size + x_box_size / 10) as i32,
                                 ((y - 1) * y_box_size + y_box_size / 10) as i32,
@@ -184,7 +184,7 @@ pub fn main() -> Result<(), String> {
                         let x_segment_size = x_box_size / 10 * 8;
                         let y_segment_size = y_box_size / 10 * 8;
 
-                        canvas.set_draw_color(Color::RGB(0, 255, 0));
+                        canvas.set_draw_color(Color::RGB(255, 0, 0));
                         canvas.fill_rect(Rect::new(
                             ((x - 1) * x_box_size + x_box_size / 10) as i32,
                             ((y - 1) * y_box_size + y_box_size / 10) as i32,
